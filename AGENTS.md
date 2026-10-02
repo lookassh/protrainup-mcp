@@ -61,6 +61,7 @@ src/protrainup_mcp/
   web.py      # web realm (session+CSRF): stream, events/list, diary files
   server.py   # MCPServer + ptu_* tools (sync; SDK threadpool → locks)
 tests/        # offline, MockTransport, hermetic against .env
+.agents/skills/protrainup/   # skill: how an agent should USE the ptu_* tools
 ```
 
 ## Adding a tool (checklist)

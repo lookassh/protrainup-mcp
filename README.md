@@ -181,6 +181,15 @@ pip install git+https://github.com/lookassh/protrainup-mcp.git
 uv run python -c "from protrainup_mcp.config import load_config; from protrainup_mcp.client import ProTrainUpClient; print(ProTrainUpClient(load_config()).whoami())"
 ```
 
+## Agent skill (`.agents/skills/protrainup/`)
+
+The repo ships a skill that teaches coding/agent tools how to *use* the
+`ptu_*` tools well: which tool answers which question, working workflows
+(week schedule, unread messages, club news), gotchas verified against the
+live API, and privacy guidance for minors' data. Agents supporting the
+`.agents/skills` convention (e.g. ZCode) discover it automatically when the
+repo is open; otherwise point your agent at the SKILL.md.
+
 ## Caveats
 
 - The API is **private/undocumented** — you use it at your own risk and only
