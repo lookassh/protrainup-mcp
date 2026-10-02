@@ -9,9 +9,23 @@ from __future__ import annotations
 import pytest
 
 from protrainup_mcp import config as config_mod
-from protrainup_mcp.config import ENV_LOGIN, ENV_PASSWORD, load_config
+from protrainup_mcp.config import (
+    ENV_LOGIN,
+    ENV_PASSWORD,
+    TransportConfig,
+    load_config,
+    load_transport_config,
+)
 
-ENV_KEYS = ("PROTRAINUP_LOGIN", "PROTRAINUP_PASSWORD", "PROTRAINUP_BASE_URL", "PROTRAINUP_TIMEOUT")
+ENV_KEYS = (
+    "PROTRAINUP_LOGIN",
+    "PROTRAINUP_PASSWORD",
+    "PROTRAINUP_BASE_URL",
+    "PROTRAINUP_TIMEOUT",
+    "PROTRAINUP_MCP_TRANSPORT",
+    "PROTRAINUP_MCP_HOST",
+    "PROTRAINUP_MCP_PORT",
+)
 
 
 @pytest.fixture(autouse=True)
@@ -70,3 +84,42 @@ def test_trailing_quote_in_password_is_preserved(tmp_path):
 def test_matched_quote_pair_is_stripped(tmp_path):
     (tmp_path / ".env").write_text('PROTRAINUP_PASSWORD="abc def"\n', encoding="utf-8")
     assert load_config().password == "abc def"
+
+
+class TestTransportConfig:
+    def test_defaults_to_stdio(self):
+        t = load_transport_config()
+        assert t == TransportConfig(transport="stdio", host="127.0.0.1", port=8000)
+        assert not t.is_http
+
+    def test_http_env_enables_http_with_container_default_host(self, monkeypatch):
+        monkeypatch.setenv("PROTRAINUP_MCP_TRANSPORT", "http")
+        t = load_transport_config()
+        assert t.is_http
+        assert t.host == "0.0.0.0"
+        assert t.port == 8000
+
+    def test_streamable_http_alias_is_accepted(self, monkeypatch):
+        monkeypatch.setenv("PROTRAINUP_MCP_TRANSPORT", "streamable-http")
+        assert load_transport_config().is_http
+
+    def test_host_and_port_from_env(self, monkeypatch):
+        monkeypatch.setenv("PROTRAINUP_MCP_TRANSPORT", "http")
+        monkeypatch.setenv("PROTRAINUP_MCP_HOST", "127.0.0.1")
+        monkeypatch.setenv("PROTRAINUP_MCP_PORT", "9001")
+        t = load_transport_config()
+        assert (t.host, t.port) == ("127.0.0.1", 9001)
+
+    def test_invalid_transport_raises(self, monkeypatch):
+        monkeypatch.setenv("PROTRAINUP_MCP_TRANSPORT", "grpc")
+        with pytest.raises(ValueError, match="stdio.*http|PROTRAINUP_MCP_TRANSPORT"):
+            load_transport_config()
+
+    def test_transport_knobs_read_from_env_file(self, tmp_path):
+        (tmp_path / ".env").write_text(
+            "PROTRAINUP_MCP_TRANSPORT=http\nPROTRAINUP_MCP_PORT=8123\n",
+            encoding="utf-8",
+        )
+        t = load_transport_config()
+        assert t.is_http
+        assert t.port == 8123

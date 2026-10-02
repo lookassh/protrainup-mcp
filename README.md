@@ -140,6 +140,37 @@ Jeśli Twój agent nie obsługuje MCP natywnie, użyj dowolnego mostu
 function-calling→MCP (np. `mcp` Python SDK jako klient) — wszystkie narzędzia
 zwracają JSON w postaci tekstu, więc mapują się 1:1 na funkcje.
 
+## Uruchomienie w Dockerze (transport HTTP)
+
+Dla agentów działających w kontenerach (np. Hermes na Proxmoxie) serwer można
+postawić jako **sidecar HTTP** zamiast procesu stdio:
+
+```bash
+docker compose up -d --build   # używa compose.yml i .env z katalogu projektu
+```
+
+Endpoint MCP: `http://protrainup-mcp:8000/mcp` (nazwa serwisu w sieci compose).
+Sterowanie transportem zmiennymi:
+
+| Zmienna | Domyślnie | Opis |
+|---|---|---|
+| `PROTRAINUP_MCP_TRANSPORT` | `stdio` | `stdio` lub `http` (alias: `streamable-http`) |
+| `PROTRAINUP_MCP_HOST` | `127.0.0.1` (stdio) / `0.0.0.0` (http) | adres nasłuchu |
+| `PROTRAINUP_MCP_PORT` | `8000` | port HTTP |
+
+> **Uwaga bezpieczeństwa:** endpoint HTTP **nie ma własnej autoryzacji** —
+> każdy, kto dosięgnie portu, używa Twojego konta ProTrainUp. Nie publikuj
+> portu na zewnątrz (`ports:`); trzymaj go w sieci wewnętrznej compose lub
+> za reverse proxy z autoryzacją.
+
+Jeśli agent (i jego kontener) obsługuje serwery stdio, prościej jest
+zainstalować pakiet wewnątrz kontenera agenta:
+
+```bash
+pip install git+https://github.com/lookassh/protrainup-mcp.git
+# a w konfiguracji MCP agenta: command "protrainup-mcp" + env PROTRAINUP_*
+```
+
 ## Weryfikacja
 
 ```bash

@@ -1,0 +1,25 @@
+# Example: protrainup-mcp as a sidecar next to your agent (e.g. Hermes).
+# Put both services in one compose project so Hermes can reach the MCP
+# endpoint at http://protrainup-mcp:8000/mcp by service name.
+#
+# Credentials live in .env next to this file (see .env.example) - they are
+# passed to the container at runtime and never baked into the image.
+#
+# NOTE: the HTTP endpoint has NO authentication. Do not publish the port
+# (no "ports:") unless you front it with an authenticating reverse proxy;
+# keep it on the internal compose network.
+services:
+  protrainup-mcp:
+    build: .
+    # or, once you publish an image:
+    # image: ghcr.io/lookassh/protrainup-mcp:latest
+    restart: unless-stopped
+    env_file: .env
+    # environment:
+    #   PROTRAINUP_MCP_PORT: "8000"
+
+  # hermes:
+  #   image: your-hermes-image
+  #   depends_on:
+  #     - protrainup-mcp
+  #   # point its MCP client at: http://protrainup-mcp:8000/mcp

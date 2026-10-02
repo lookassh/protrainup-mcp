@@ -12,8 +12,19 @@ ENV_LOGIN = "PROTRAINUP_LOGIN"
 ENV_PASSWORD = "PROTRAINUP_PASSWORD"
 ENV_BASE_URL = "PROTRAINUP_BASE_URL"
 ENV_TIMEOUT = "PROTRAINUP_TIMEOUT"
+ENV_MCP_TRANSPORT = "PROTRAINUP_MCP_TRANSPORT"
+ENV_MCP_HOST = "PROTRAINUP_MCP_HOST"
+ENV_MCP_PORT = "PROTRAINUP_MCP_PORT"
 
-_ENV_KEYS = (ENV_LOGIN, ENV_PASSWORD, ENV_BASE_URL, ENV_TIMEOUT)
+_ENV_KEYS = (
+    ENV_LOGIN,
+    ENV_PASSWORD,
+    ENV_BASE_URL,
+    ENV_TIMEOUT,
+    ENV_MCP_TRANSPORT,
+    ENV_MCP_HOST,
+    ENV_MCP_PORT,
+)
 
 
 def _env_file_candidates() -> list[Path]:
@@ -80,4 +91,41 @@ def load_config() -> Config:
         password=get(ENV_PASSWORD),
         base_url=get(ENV_BASE_URL, DEFAULT_BASE_URL).rstrip("/"),
         timeout=timeout,
+    )
+
+
+@dataclass(frozen=True)
+class TransportConfig:
+    """How the MCP server itself listens (independent of ProTrainUp credentials)."""
+
+    transport: str = "stdio"  # "stdio" | "http"
+    host: str = "127.0.0.1"
+    port: int = 8000
+
+    @property
+    def is_http(self) -> bool:
+        return self.transport == "http"
+
+
+def load_transport_config() -> TransportConfig:
+    overrides = _env_file_overrides()
+
+    def get(key: str, default: str = "") -> str:
+        return os.environ.get(key) or overrides.get(key, default)
+
+    transport = get(ENV_MCP_TRANSPORT, "stdio").strip().lower()
+    if transport in ("http", "streamable-http", "streamable_http"):
+        transport = "http"
+    elif transport != "stdio":
+        raise ValueError(
+            f"{ENV_MCP_TRANSPORT} must be 'stdio' or 'http', got: {transport!r}"
+        )
+    try:
+        port = int(get(ENV_MCP_PORT, "8000"))
+    except ValueError:
+        port = 8000
+    return TransportConfig(
+        transport=transport,
+        host=get(ENV_MCP_HOST, "127.0.0.1" if transport == "stdio" else "0.0.0.0"),
+        port=port,
     )

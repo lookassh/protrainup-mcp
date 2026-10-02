@@ -1,8 +1,16 @@
 """MCP server exposing read-only ProTrainUp tools for AI agents.
 
-Run (stdio transport, the default for MCP clients):
+Default run (stdio transport, for MCP clients that spawn a command):
 
     protrainup-mcp
+
+HTTP transport for container/sidecar deployments - the endpoint has NO
+built-in authentication, so keep it on a private network or behind an
+authenticating reverse proxy:
+
+    PROTRAINUP_MCP_TRANSPORT=http protrainup-mcp
+    # extra knobs: PROTRAINUP_MCP_HOST (default 0.0.0.0 for http),
+    #             PROTRAINUP_MCP_PORT (default 8000); endpoint path is /mcp
 
 Requires PROTRAINUP_LOGIN and PROTRAINUP_PASSWORD in the environment.
 """
@@ -18,7 +26,7 @@ import httpx
 from mcp.server.mcpserver import MCPServer
 
 from .client import ProTrainUpClient, ProTrainUpError
-from .config import load_config
+from .config import load_config, load_transport_config
 from .web import WebSessionClient
 
 mcp = MCPServer("protrainup", instructions=(
@@ -210,7 +218,11 @@ def ptu_api_get(path: str, params_json: str = "") -> str:
 
 
 def main() -> None:
-    mcp.run()
+    transport = load_transport_config()
+    if transport.is_http:
+        mcp.run(transport="streamable-http", host=transport.host, port=transport.port)
+    else:
+        mcp.run()
 
 
 if __name__ == "__main__":

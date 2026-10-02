@@ -9,7 +9,8 @@ Python 3.10+, uv, SDK `mcp` 2.x.
 ```bash
 uv sync                 # instalacja (.venv)
 uv run pytest -q        # testy — MUSZĄ być offline i hermetyczne
-uv run protrainup-mcp   # uruchomienie serwera MCP (stdio)
+uv run protrainup-mcp   # serwer MCP, stdio (domyślnie)
+PROTRAINUP_MCP_TRANSPORT=http uv run protrainup-mcp   # wariant HTTP (sidecar)
 ```
 
 Weryfikacja na żywo (wymaga `.env` z loginem/hasłem — patrz zasady niżej):
