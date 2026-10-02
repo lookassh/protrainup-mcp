@@ -1,6 +1,6 @@
 ---
 name: protrainup
-description: Work with a ProTrainUp sports club account through the protrainup-mcp MCP server (ptu_* tools). Use whenever the user asks about their club - trainings, matches, schedule, messages from coaches, absences, club announcements, team files, or motoric tests - even if they don't name ProTrainUp explicitly. Also use for any question about ptu_* tools or their errors.
+description: Use for anything about the ProTrainUp club or ptu_* tools.
 ---
 
 # ProTrainUp club data via protrainup-mcp
@@ -9,6 +9,17 @@ You are answering questions about a sports club in **ProTrainUp** using the
 read-only `protrainup-mcp` MCP server. Club data is in Polish (team names,
 locations, messages); answer in the user's language, quote Polish content
 verbatim only when it matters.
+
+## When to use this skill
+
+Trigger on any of these, even when the user never says "ProTrainUp":
+
+- trainings, matches, the weekly schedule, locations or coaches of a club
+- messages from coaches/staff, absence notifications, unread counters
+- club or team announcements, the team wall, scheduled posts
+- team files: schedules, call-ups (powołania), photo galleries
+- fitness/motoric tests (10m run etc.)
+- anything about the `ptu_*` tools themselves, including their errors
 
 ## Prerequisite
 

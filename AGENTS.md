@@ -64,6 +64,11 @@ tests/        # offline, MockTransport, hermetic against .env
 .agents/skills/protrainup/   # skill: how an agent should USE the ptu_* tools
 ```
 
+Skill frontmatter note: the `description` must be **one sentence, ≤60 chars,
+trigger first, ending with a period** — some agent skill indexes (e.g.
+Hermes) truncate longer descriptions at 57 chars + "…", destroying the
+routing signal. Put trigger detail in the body ("When to use this skill").
+
 ## Adding a tool (checklist)
 
 1. A method in `client.py` or `web.py` (+ endpoint knowledge in the docstring).
